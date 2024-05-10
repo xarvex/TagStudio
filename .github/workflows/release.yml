@@ -13,7 +13,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt pyinstaller
       - run: pyinstaller tagstudio/tag_studio.py
-      - run: tar czf dist/tagstudio_linux64.tar.gz dist/tag_studio/tag_studio
+      - run: tar czf dist/tagstudio_linux_x86_64.tar.gz dist/tag_studio/tag_studio
       - uses: actions/upload-artifact@v4
         with:
           name: tagstudio_linux_x86_64
@@ -53,7 +53,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt pyinstaller
       - run: pyinstaller tagstudio/tag_studio.py
-      - run: Compress-Archive -Path dist/tag_studio/tag_studio.exe -DestinationPath tagstudio_windows_x86_64.zip
+      - run: Compress-Archive -Path dist/tag_studio/tag_studio.exe -DestinationPath dist/tagstudio_windows_x86_64.zip
       - uses: actions/upload-artifact@v4
         with:
           name: tagstudio_windows_x86_64

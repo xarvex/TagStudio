@@ -3,12 +3,11 @@ on:
     types: ['published']
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os.type }}
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-20.04', 'macos-latest', 'windows-latest']
-        binary-end: ['', '', '.exe']
+        os: [{ type: 'ubuntu-20.04', binary: '' }, { type: 'macos-latest', binary: ''}, { type: 'windows-latest', binary: '.exe' }]
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -18,4 +17,5 @@ jobs:
     - run: pyinstaller tagstudio/tag_studio.py
     - uses: actions/upload-artifact@v4
       with:
-        path: dist/tag_studio/tagstudio-${{ matrix.os }}${{ matrix.binary-end }}
+        name: tagstudio-${{ maxtrix.os }}
+        path: dist/tag_studio/tagstudio-${{ matrix.os.type }}${{ matrix.os.binary }}

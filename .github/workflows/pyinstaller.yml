@@ -17,5 +17,5 @@ jobs:
     - run: pyinstaller tagstudio/tag_studio.py
     - uses: actions/upload-artifact@v4
       with:
-        name: tagstudio-${{ matrix.os }}
-        path: dist/tag_studio/tagstudio-${{ matrix.os.type }}${{ matrix.os.binary }}
+        name: tagstudio-${{ matrix.os.type }}
+        path: dist/tag_studio/tagstudio${{ matrix.os.binary }}

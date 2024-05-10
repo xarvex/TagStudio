@@ -8,6 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-20.04', 'macos-latest', 'windows-latest']
+        binary-end: ['', '', '.exe']
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -17,4 +18,4 @@ jobs:
     - run: pyinstaller tagstudio/tag_studio.py
     - uses: actions/upload-artifact@v4
       with:
-        path: dist/*
+        path: dist/tag_studio/tagstudio-${{ maxtrix.os }}${{ matrix.binary-end }}

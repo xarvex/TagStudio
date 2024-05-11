@@ -7,11 +7,11 @@ jobs:
   linux:
     strategy:
       matrix:
-        build-flag: [-D, -F]
+        build-type: [onedir, onefile]
         include:
-          - build-flag: -D
+          - build-type: onedir
             suffix: ''
-          - build-flag: -F
+          - build-type: onefile
             suffix: _portable
     runs-on: ubuntu-22.04
     steps:
@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt pyinstaller
-      - run: pyinstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources:resources' ${{ matrix.build-flag }} -n tagstudio
+      - run: pyinstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources:resources' --${{ matrix.build-type }} -n tagstudio
       - run: tar czfC dist/tagstudio_linux_x86_64${{ matrix.suffix }}.tar.gz dist tagstudio
       - uses: actions/upload-artifact@v4
         with:
@@ -30,12 +30,12 @@ jobs:
   macos:
     strategy:
       matrix:
-        build-flag: [-D, -F]
+        build-type: [onedir, onefile]
         runner: [macos-11, macos-14]
         include:
-          - build-flag: -D
+          - build-type: onedir
             suffix: ''
-          - build-flag: -F
+          - build-type: onefile
             suffix: _portable
           - runner: macos-11
             arch: x86_64
@@ -50,7 +50,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt pyinstaller
-      - run: pyinstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources:resources' ${{ matrix.build-flag }} -n tagstudio
+      - run: pyinstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources:resources' --${{ matrix.build-type }} -n tagstudio
       - run: tar czfC dist/tagstudio_macos_${{ matrix.arch }}${{ matrix.suffix }}.tar.gz dist tagstudio
       - uses: actions/upload-artifact@v4
         with:
@@ -60,12 +60,12 @@ jobs:
   windows:
     strategy:
       matrix:
-        build-flag: [-D, -F]
+        build-type: [onedir, onefile]
         include:
-          - build-flag: -D
+          - build-type: onedir
             suffix: ''
             file-end: ''
-          - build-flag: -F
+          - build-type: onefile
             suffix: _portable
             file-end: '.exe'
     runs-on: windows-2019
@@ -75,8 +75,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt pyinstaller
-      - run: PyInstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources;resources' ${{ matrix.build-flag }} -n TagStudio -i 'tagstudio/resources/icon.ico'
-      - run: Compress-Archive -Path dist/TagStudio${{ matrix.file-end }} -DestinationPath dist/tagstudio_windows_x86_64${{ matrix.suffix }}.zip
+      - run: PyInstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources;resources' --${{ matrix.build-type }} -n TagStudio -i 'tagstudio/resources/icon.ico'
+      - run: Compress-Archive -Path dist/TagStudio${{ matrix.file-end }} onedirestinationPath dist/tagstudio_windows_x86_64${{ matrix.suffix }}.zip
       - uses: actions/upload-artifact@v4
         with:
           name: tagstudio_windows_x86_64${{ matrix.suffix }}

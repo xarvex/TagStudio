@@ -5,6 +5,14 @@ on:
 
 jobs:
   linux:
+    strategy:
+      matrix:
+        build-flag: [-D, -F]
+        include:
+          - build-flag: -D
+            suffix: ''
+          - build-flag: -F
+            suffix: _portable
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -12,18 +20,23 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt pyinstaller
-      - run: pyinstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources:resources' -F -n tagstudio
-      - run: tar czfC dist/tagstudio_linux_x86_64.tar.gz dist tagstudio
+      - run: pyinstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources:resources' ${{ matrix.build-flag }} -n tagstudio
+      - run: tar czfC dist/tagstudio_linux_x86_64${{ matrix.suffix }}.tar.gz dist tagstudio
       - uses: actions/upload-artifact@v4
         with:
-          name: tagstudio_linux_x86_64
-          path: dist/tagstudio_linux_x86_64.tar.gz
+          name: tagstudio_linux_x86_64${{ matrix.suffix }}
+          path: dist/tagstudio_linux_x86_64${{ matrix.suffix }}.tar.gz
 
   macos:
     strategy:
       matrix:
+        build-flag: [-D, -F]
         runner: [macos-11, macos-14]
         include:
+          - build-flag: -D
+            suffix: ''
+          - build-flag: -F
+            suffix: _portable
           - runner: macos-11
             arch: x86_64
           - runner: macos-14
@@ -37,14 +50,24 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt pyinstaller
-      - run: pyinstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources:resources' -F -n tagstudio
-      - run: tar czfC dist/tagstudio_macos_${{ matrix.arch }}.tar.gz dist tagstudio
+      - run: pyinstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources:resources' ${{ matrix.build-flag }} -n tagstudio
+      - run: tar czfC dist/tagstudio_macos_${{ matrix.arch }}${{ matrix.suffix }}.tar.gz dist tagstudio
       - uses: actions/upload-artifact@v4
         with:
-          name: tagstudio_macos_${{ matrix.arch }}
-          path: dist/tagstudio_macos_${{ matrix.arch }}.tar.gz
+          name: tagstudio_macos_${{ matrix.arch }}${{ matrix.suffix }}
+          path: dist/tagstudio_macos_${{ matrix.arch }}${{ matrix.suffix }}.tar.gz
 
   windows:
+    strategy:
+      matrix:
+        build-flag: [-D, -F]
+        include:
+          - build-flag: -D
+            suffix: ''
+            file-end: ''
+          - build-flag: -F
+            suffix: _portable
+            file-end: '.exe'
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v4
@@ -52,12 +75,12 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt pyinstaller
-      - run: PyInstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources;resources' -i 'tagstudio/resources/icon.ico' -F -n TagStudio
-      - run: Compress-Archive -Path dist/TagStudio.exe -DestinationPath dist/tagstudio_windows_x86_64.zip
+      - run: PyInstaller tagstudio/tag_studio.py -w --add-data 'tagstudio/resources;resources' -i 'tagstudio/resources/icon.ico' ${{ matrix.build-flag }} -n TagStudio
+      - run: Compress-Archive -Path dist/TagStudio${{ matrix.file-end }} -DestinationPath dist/tagstudio_windows_x86_64${{ matrix.suffix }}.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: tagstudio_windows_x86_64
-          path: dist/tagstudio_windows_x86_64.zip
+          name: tagstudio_windows_x86_64${{ matrix.suffix }}
+          path: dist/tagstudio_windows_x86_64${{ matrix.suffix }}.zip
 
   publish:
     needs: [linux, macos, windows]
@@ -71,6 +94,10 @@ jobs:
         with:
           files: |
             tagstudio_linux_x86_64/*
+            tagstudio_linux_x86_64_portable/*
             tagstudio_macos_x86_64/*
+            tagstudio_macos_x86_64_portable/*
             tagstudio_macos_arm64/*
+            tagstudio_macos_arm64_portable/*
             tagstudio_windows_x86_64/*
+            tagstudio_windows_x86_64_portable/*

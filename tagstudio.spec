@@ -2,16 +2,19 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 
+import argparse
 import platform
 from argparse import ArgumentParser
+from tomllib import load
 
 from PyInstaller.building.api import COLLECT, EXE, PYZ
 from PyInstaller.building.build_main import Analysis
 from PyInstaller.building.osx import BUNDLE
-from tomllib import load
 
 parser = ArgumentParser()
-parser.add_argument("--portable", action="store_true")
+# HACK: Without this, the script will fail if empty arguments are passed.
+parser.add_argument("_", nargs="*", help=argparse.SUPPRESS)
+parser.add_argument("--portable", action="store_true", help="set portable state of the build")
 options = parser.parse_args()
 
 with open("pyproject.toml", "rb") as file:

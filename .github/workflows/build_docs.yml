@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: (c) TagStudio Contributors
+# SPDX-License-Identifier: CC0-1.0
+---
+name: Build Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/actions/setup-python/action.yml
+      - .github/workflows/build_docs.yml
+      - docs/**
+      - CHANGELOG.md
+      - mkdocs.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    defaults:
+      run:
+        shell: sh
+
+    name: Publish Docs
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: true
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python
+        with:
+          groups: mkdocs
+
+      - name: Use cache
+        uses: actions/cache@v6
+        with:
+          key: mkdocs-material-${{ github.run_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+
+      - name: Run mkdocs
+        env:
+          DISABLE_MKDOCS_2_WARNING: 'true'
+        run: mkdocs gh-deploy --force

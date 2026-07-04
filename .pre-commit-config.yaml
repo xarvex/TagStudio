@@ -4,10 +4,9 @@ repos:
     hooks:
       - id: pyright
         name: pyright
-        entry: pyright
+        entry: basedpyright
         language: system
         types_or: [python, pyi]
-        require_serial: true
 
       - id: ruff
         name: ruff

@@ -42,12 +42,24 @@ dependencies = [
     "semver~=3.0.4",
 ]
 
-[project.optional-dependencies]
-dev = ["tagstudio[mkdocs,pyright,pre-commit,pyinstaller,pytest,ruff]"]
+[project.gui-scripts]
+tagstudio = "tagstudio.main:main"
+
+[dependency-groups]
+dev = [
+    { include-group = "checks" },
+    { include-group = "mkdocs" },
+    { include-group = "pre-commit" },
+    { include-group = "pyinstaller" },
+]
+checks = [{ include-group = "linting" }, { include-group = "pytest" }]
+testing = [{ include-group = "pytest" }]
+linting = [{ include-group = "pyright" }, { include-group = "ruff" }]
+
 mkdocs = ["mkdocs-material[imaging]>=9.7", "mkdocs-redirects~=1.2"]
-pyright = ["pyright~=1.1.409"]
 pre-commit = ["pre-commit~=4.2"]
 pyinstaller = ["Pyinstaller~=6.21"]
+pyright = ["pyright~=1.1.409"]
 pytest = [
     "pytest==9.0.3",
     "pytest-cov==6.1.1",
@@ -57,12 +69,8 @@ pytest = [
 ]
 ruff = ["ruff==0.15.17"]
 
-[project.gui-scripts]
-tagstudio = "tagstudio.main:main"
-
 [tool.hatch.build.targets.wheel]
 packages = ["src/tagstudio"]
-
 
 [tool.pytest.ini_options]
 qt_api = "pyside6"

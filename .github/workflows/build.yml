@@ -10,7 +10,7 @@ on:
   schedule:
     # From: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule
     # To decrease the chance of delay, schedule your workflow to run at a different time of the hour.
-    - cron: 3 42 * * *
+    - cron: 42 3 * * *
       timezone: America/Los_Angeles
   workflow_dispatch:
 

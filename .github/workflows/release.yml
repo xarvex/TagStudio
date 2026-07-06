@@ -1,0 +1,92 @@
+# SPDX-FileCopyrightText: (c) TagStudio Contributors
+# SPDX-License-Identifier: CC0-1.0
+---
+name: Release
+
+on:
+  schedule:
+    # From: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule
+    # To decrease the chance of delay, schedule your workflow to run at a different time of the hour.
+    - cron: 3 42 * * *
+      timezone: America/Los_Angeles
+  workflow_dispatch:
+    inputs:
+      type:
+        description: Type of release being made
+        type: choice
+        options:
+          - Nightly
+          - Pre-Release
+          - Release
+        default: Nightly
+      draft:
+        description: Whether the release should be a draft
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  metadata:
+    defaults:
+      run:
+        shell: sh
+
+    name: Metadata
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version-base: ${{ steps.version.outputs.version-base }}
+      version-prerelease: ${{ steps.version.outputs.version-prerelease }}
+      version-prerelease-identifier: ${{ steps.version.outputs.version-prerelease-identifier }}
+      version-buildmetadata: ${{ steps.version.outputs.version-buildmetadata }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Parse SemVer version
+        id: version
+        shell: bash
+        run: |
+          version=${GITHUB_REF_NAME#v*}
+
+          version_parts=()
+          while IFS= read -r part; do
+              version_parts+=("${part}")
+          done < <(.github/scripts/semver-parts.pl <<<"${version}")
+
+          version_base=${version_parts[0]}.${version_parts[1]}.${version_parts[2]}
+          version_prerelease=${version_parts[3]:-}
+          case ${version_prerelease} in
+          *.*) version_prerelease_identifier=${version_prerelease#*.} ;;
+          *) version_prerelease_identifier= ;;
+          esac
+          version_buildmetadata=${version_parts[4]:-}
+
+          cat <<EOF >>"${GITHUB_OUTPUT}"
+          version=${version}
+          version-base=${version_base}
+          version-prerelease=${version_prerelease}
+          version-prerelease-identifier=${version_prerelease_identifier}
+          version-buildmetadata=${version_buildmetadata}
+          EOF
+
+  release:
+    permissions:
+      contents: write
+
+    name: Create Release
+    needs: metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: ${{ inputs.draft }}
+          prerelease: ${{ inputs.type != 'Release' }}
+          title: >-
+            Alpha v${{ needs.metadata.outputs.version-base }}
+            ${{ needs.metadata.outputs.type && format(' {0}', needs.metadata.outputs.type) }}
+            ${{ needs.metadata.outputs.version-prerelease-identifier && format(' {0}', needs.metadata.outputs.version-prerelease-identifier) }}

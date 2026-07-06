@@ -97,6 +97,9 @@ jobs:
           - os: ubuntu-22.04
             os-label: Linux
 
+          - os: macos-latest
+            os-label: macOS
+
           - os: windows-2022
             os-label: Windows
     defaults: *shell-defaults
@@ -133,6 +136,10 @@ jobs:
             libyaml-dev \
             ripgrep \
             x11-utils
+
+      - name: Install system dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ripgrep
 
       - name: Install system dependencies (Windows)
         if: runner.os == 'Windows'

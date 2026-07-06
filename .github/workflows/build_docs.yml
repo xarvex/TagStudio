@@ -21,16 +21,16 @@ concurrency:
 
 jobs:
   publish:
-    defaults:
-      run:
-        shell: sh
-
-    name: Publish Docs
     concurrency:
       group: ${{ github.workflow }}
       cancel-in-progress: true
     permissions:
       contents: write
+    defaults:
+      run:
+        shell: sh
+
+    name: Publish Docs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

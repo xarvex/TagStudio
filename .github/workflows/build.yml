@@ -168,7 +168,7 @@ jobs:
             with:
               path: ${{ env.BUILD_ARTIFACT_DEFAULT }}
               if-no-files-found: error
-              retention-days: &uploard-artifact-retention-days ${{ case(needs.meta.outputs.type == 'Nightly', '7', '1') }}
+              retention-days: &upload-artifact-retention-days ${{ case(needs.meta.outputs.type == 'Nightly', '7', '1') }}
               archive: false
 
           - name: Upload build artifact (portable)
@@ -177,15 +177,16 @@ jobs:
             with:
               path: ${{ env.BUILD_ARTIFACT_PORTABLE }}
               if-no-files-found: error
-              retention-days: *uploard-artifact-retention-days
+              retention-days: *upload-artifact-retention-days
               archive: false
 
-  publish:
-    name: Publish Build
-    needs: [meta, build]
-    if: needs.meta.outputs.type != 'Nightly'
+  upload:
     permissions:
       contents: write
+
+    name: Upload Builds to Release
+    needs: [meta, build]
+    if: needs.meta.outputs.type != 'Nightly'
     runs-on: ubuntu-latest
     steps:
       - name: Download build artifacts
@@ -195,7 +196,7 @@ jobs:
           merge-multiple: 'true'
           skip-decompress: 'true'
 
-      - name: Publish artifacts
+      - name: Upload build artifacts to release
         uses: softprops/action-gh-release@v3
         with:
           files: ${{ runner.temp }}/download/*

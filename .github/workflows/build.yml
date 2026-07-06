@@ -6,7 +6,7 @@ name: Build
 on:
   push:
     tags:
-      - v[0-9]+.[0-9]+.[0-9]+*
+      - v*
   schedule:
     # From: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule
     # To decrease the chance of delay, schedule your workflow to run at a different time of the hour.
@@ -133,33 +133,33 @@ jobs:
           - name: Run PyInstaller (Linux)
             if: runner.os == 'Linux'
             run: |
-              pyinstaller --distpath dist/default --workpath build/default tagstudio.spec
+              pyinstaller --distpath dist/default --workpath build/default scripts/tagstudio.spec
               tar czf "${BUILD_ARTIFACT_DEFAULT}" -C dist/default/tagstudio .
 
           - name: Run PyInstaller (Linux portable)
             if: runner.os == 'Linux'
             run: |
-              pyinstaller --distpath dist/portable --workpath build/portable tagstudio.spec -- --portable
+              pyinstaller --distpath dist/portable --workpath build/portable scripts/tagstudio.spec -- --portable
               tar czf "${BUILD_ARTIFACT_PORTABLE}" -C dist/portable tagstudio
 
           - name: Run PyInstaller (macOS)
             if: runner.os == 'macOS'
             run: |
-              pyinstaller tagstudio.spec
+              pyinstaller scripts/tagstudio.spec
               tar czf "${BUILD_ARTIFACT_DEFAULT}" -C dist TagStudio.app
 
           - name: Run PyInstaller (Windows)
             if: runner.os == 'Windows'
             shell: pwsh
             run: |
-              PyInstaller --distpath dist/default --workpath build/default tagstudio.spec
+              PyInstaller --distpath dist/default --workpath build/default scripts/tagstudio.spec
               Compress-Archive -Path dist/default/TagStudio -DestinationPath ${env:BUILD_ARTIFACT_DEFAULT}
 
           - name: Run PyInstaller (Windows portable)
             if: runner.os == 'Windows'
             shell: pwsh
             run: |
-              PyInstaller --distpath dist/portable --workpath build/portable tagstudio.spec -- --portable
+              PyInstaller --distpath dist/portable --workpath build/portable scripts/tagstudio.spec -- --portable
               Compress-Archive -Path dist/portable/TagStudio.exe -DestinationPath ${env:BUILD_ARTIFACT_PORTABLE}
 
       - parallel:

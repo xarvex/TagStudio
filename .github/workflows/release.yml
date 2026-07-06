@@ -4,6 +4,12 @@
 name: Release
 
 on:
+  push:
+    tags:
+      - nightly
+      - prerelease
+      - release
+      - v*
   schedule:
     # From: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule
     # To decrease the chance of delay, schedule your workflow to run at a different time of the hour.
@@ -24,13 +30,16 @@ on:
           - Release
         default: Nightly
       bump:
-        description: SemVer version bump (ignored on Nightly)
+        description: |-
+          SemVer version bump
+          'None' is relevant for Nightly and Pre-Release, where the metadata is bumped
         type: choice
         options:
+          - None
           - Patch
           - Minor
           - Major
-        default: Patch
+        default: None
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,39 +54,80 @@ jobs:
     name: Metadata
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      version-base: ${{ steps.version.outputs.version-base }}
-      version-prerelease: ${{ steps.version.outputs.version-prerelease }}
-      version-prerelease-identifier: ${{ steps.version.outputs.version-prerelease-identifier }}
-      version-buildmetadata: ${{ steps.version.outputs.version-buildmetadata }}
+      version: ${{ steps.version.outputs.original }}
+      version-base: ${{ steps.metadata.outputs.version-base }}
+      version-prerelease-identifier: placeholder
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
-      - name: Parse SemVer version
+      - name: Get version context
         id: version
+        env:
+          VERSION_REF: >-
+            ${{ case( github.ref_type == 'tag' && startsWith(github.ref_name, 'v'), github.ref_name, '') }}
+        run: |
+          version=${VERSION_REF:-$(git tag -l --sort=-v:refname 'v*' | head -n 1)}
+          cat <<EOF >"${GITHUB_OUTPUT}"
+          original=${version}
+          segments=$(scripts/semver-segments.pl "${version#v*}")
+          EOF
+
+      - name: Parse SemVer version segments
+        id: version-segments
+        env:
+          VERSION_SEGMENTS: ${{ steps.version.outputs.segments }}
         shell: bash
         run: |
-          version=${GITHUB_REF_NAME#v*}
-
-          version_parts=()
-          while IFS= read -r part; do
-              version_parts+=("${part}")
-          done < <(.github/scripts/semver-parts.pl <<<"${version}")
-
-          version_base=${version_parts[0]}.${version_parts[1]}.${version_parts[2]}
-          version_prerelease=${version_parts[3]:-}
-          case ${version_prerelease} in
-          *.*) version_prerelease_identifier=${version_prerelease#*.} ;;
-          *) version_prerelease_identifier= ;;
-          esac
-          version_buildmetadata=${version_parts[4]:-}
+          if type -t readarray >/dev/null; then
+              readarray -t version_segments <<<"${VERSION_SEGMENTS}"
+          else
+              version_segments=()
+              while IFS= read -r segment; do
+                  version_segments+=("${segment}")
+              done <<<"${VERSION_SEGMENTS}"
+          fi
 
           cat <<EOF >>"${GITHUB_OUTPUT}"
-          version=${version}
-          version-base=${version_base}
+          0=${version_segments[0]}
+          1=${version_segments[1]}
+          2=${version_segments[2]}
+          3=${version_segments[3]:-}
+          4=${version_segments[4]:-}
+          EOF
+
+      - name: Set metadata
+        id: metadata
+        env:
+          VERSION_DO_BUMP: >-
+            ${{ !(github.event == 'push' && github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) }}
+
+          VERSION_MAJOR: ${{ steps.version-segments.outputs.0 }}
+          VERSION_MINOR: ${{ steps.version-segments.outputs.1 }}
+          VERSION_PATCH: ${{ steps.version-segments.outputs.2 }}
+          VERSION_PRERELEASE: ${{ steps.version-segments.outputs.3 }}
+          VERSION_BUILDMETADATA: ${{ steps.version-segments.outputs.4 }}
+        run: |
+          version_major=${VERSION_MAJOR}
+          version_minor=${VERSION_MINOR}
+          version_patch=${VERSION_PATCH}
+          version_prerelease=${VERSION_PRERELEASE}
+          version_buildmetadata=${VERSION_BUILDMETADATA}
+
+          if [ "${VERSION_DO_BUMP}" = true ]; then
+            case ${INPUT_BUMP:-} in
+            None | '') ;;
+            Patch) version_patch=$((version_patch + 1)) ;;
+            Minor) version_minor=$((version_minor + 1)) ;;
+            Major) version_major=$((version_major + 1)) ;;
+            esac
+          fi
+
+          cat <<EOF >>"${GITHUB_OUTPUT}"
+          version-base=${version_major}.${version_minor}.${version_patch}
           version-prerelease=${version_prerelease}
-          version-prerelease-identifier=${version_prerelease_identifier}
           version-buildmetadata=${version_buildmetadata}
           EOF
 

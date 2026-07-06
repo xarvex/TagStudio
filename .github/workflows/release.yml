@@ -23,6 +23,14 @@ on:
           - Pre-Release
           - Release
         default: Nightly
+      bump:
+        description: SemVer version bump (ignored on Nightly)
+        type: choice
+        options:
+          - Major
+          - Minor
+          - Patch
+        default: Patch
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

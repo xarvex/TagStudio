@@ -27,9 +27,9 @@ on:
         description: SemVer version bump (ignored on Nightly)
         type: choice
         options:
-          - Major
-          - Minor
           - Patch
+          - Minor
+          - Major
         default: Patch
 
 concurrency:

@@ -1,4 +1,6 @@
 #!/usr/bin/env perl
+# SPDX-FileCopyrightText: (c) TagStudio Contributors
+# SPDX-License-Identifier: CC0-1.0
 
 use strict;
 use warnings;

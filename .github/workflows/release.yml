@@ -11,18 +11,18 @@ on:
       timezone: America/Los_Angeles
   workflow_dispatch:
     inputs:
+      draft:
+        description: Mark as draft
+        type: boolean
+        default: true
       type:
-        description: Type of release being made
+        description: Release type
         type: choice
         options:
           - Nightly
           - Pre-Release
           - Release
         default: Nightly
-      draft:
-        description: Whether the release should be a draft
-        type: boolean
-        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

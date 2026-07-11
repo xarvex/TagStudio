@@ -51,6 +51,8 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v47.0.6
         with:
+          fail_on_initial_diff_error: 'true'
+          fail_on_submodule_diff_error: 'true'
           files_yaml: |
             generic:
               - .github/workflows/checks_python.yml
@@ -68,11 +70,11 @@ jobs:
             ruff:
               - .editorconfig
 
-      - name: List all changed files
+      - name: List changed files
         env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+          GENERIC_CHANGED_FILES: ${{ steps.changed-files.outputs.generic_changed_files }}
         run: |
-          for file in ${ALL_CHANGED_FILES}; do
+          for file in ${GENERIC_CHANGED_FILES}; do
             echo "$file was changed"
           done
 

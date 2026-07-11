@@ -108,7 +108,7 @@ jobs:
 
   check-pytest:
     concurrency:
-      group: ${{ github.workflow }}-pytest-${{ github.ref }}
+      group: ${{ github.workflow }}-pytest-${{ matrix.os }}-${{ github.ref }}
       cancel-in-progress: true
     strategy:
       fail-fast: false
@@ -173,7 +173,7 @@ jobs:
 
   check-ruff:
     concurrency:
-      group: ${{ github.workflow }}-ruff-${{ runner.os }}-${{ github.ref }}
+      group: ${{ github.workflow }}-ruff-${{ github.ref }}
       cancel-in-progress: true
 
     name: Ruff

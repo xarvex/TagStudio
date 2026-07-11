@@ -83,8 +83,8 @@ jobs:
           EOF
 
   check-pyright:
-    concurrency: &concurrency
-      group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+    concurrency:
+      group: ${{ github.workflow }}-pyright-${{ github.ref }}
       cancel-in-progress: true
 
     name: Pyright
@@ -107,7 +107,9 @@ jobs:
         run: pyright
 
   check-pytest:
-    concurrency: *concurrency
+    concurrency:
+      group: ${{ github.workflow }}-pytest-${{ github.ref }}
+      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
@@ -170,7 +172,9 @@ jobs:
         run: pytest
 
   check-ruff:
-    concurrency: *concurrency
+    concurrency:
+      group: ${{ github.workflow }}-ruff-${{ github.ref }}
+      cancel-in-progress: true
 
     name: Ruff
     needs: run-conditions

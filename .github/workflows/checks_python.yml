@@ -29,7 +29,7 @@ defaults:
 jobs:
   run-conditions:
     permissions:
-      pull-requests: ${{ case(github.event_name == 'pull_request', 'read', 'none') }}
+      pull-requests: read
 
     name: Run Conditions
     runs-on: ubuntu-latest

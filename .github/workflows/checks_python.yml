@@ -42,12 +42,23 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/checkout@v7
         with:
-          fetch-depth: '0'
+          # Largest positive number; infinite depth.
+          # Using 0 would grab all branches.
+          # `git fetch --unshallow` as suggested later would be an extra operation.
+          # See: https://github.com/actions/checkout/issues/520
+          # See: https://stackoverflow.com/questions/6802145/how-to-convert-a-git-shallow-clone-to-a-full-clone/6802238#6802238
+          fetch-depth: '2147483647'
 
       - name: Check changed files
         id: changed-files
         uses: tj-actions/changed-files@v47.0.6
         with:
+          fail_on_initial_diff_error: 'true'
+          fail_on_submodule_diff_error: 'true'
+          skip_initial_fetch: 'true'
+          since_last_remote_commit: 'true'
+
+          # WARNING: Does not support `?` glob operand!
           files_yaml: |
             generic:
               - .github/workflows/checks_python.yml
@@ -66,14 +77,6 @@ jobs:
             ruff:
               - .editorconfig
 
-      - name: List changed files
-        env:
-          GENERIC: ${{ steps.changed-files.outputs.generic_all_changed_files }}
-          PYRIGHT: ${{ steps.changed-files.outputs.pyright_all_changed_files }}
-          PYTEST: ${{ steps.changed-files.outputs.pytest_all_changed_files }}
-          RUFF: ${{ steps.changed-files.outputs.ruff_all_changed_files }}
-        run: ''
-
       - name: Set run conditions
         id: run-conditions
         run: |
@@ -85,7 +88,7 @@ jobs:
 
   check-pyright:
     concurrency:
-      group: ${{ github.workflow }}-pyright-${{ github.ref }}
+      group: pyright-${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
 
     name: Pyright
@@ -109,7 +112,7 @@ jobs:
 
   check-pytest:
     concurrency:
-      group: ${{ github.workflow }}-pytest-${{ matrix.os }}-${{ github.ref }}
+      group: ${{ matrix.os }}-pytest-${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     strategy:
       fail-fast: false
@@ -174,7 +177,7 @@ jobs:
 
   check-ruff:
     concurrency:
-      group: ${{ github.workflow }}-ruff-${{ github.ref }}
+      group: ruff-${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
 
     name: Ruff

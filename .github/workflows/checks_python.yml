@@ -56,7 +56,6 @@ jobs:
           fail_on_initial_diff_error: 'true'
           fail_on_submodule_diff_error: 'true'
           skip_initial_fetch: 'true'
-          since_last_remote_commit: 'true'
 
           # WARNING: Does not support `?` glob operand!
           files_yaml: |

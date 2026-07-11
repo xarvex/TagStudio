@@ -67,11 +67,11 @@ jobs:
 
       - name: List changed files
         env:
-          GENERIC_CHANGED_FILES: ${{ steps.changed-files.outputs.generic_all_changed_files }}
-        run: |
-          for file in ${GENERIC_CHANGED_FILES}; do
-            echo "$file was changed"
-          done
+          GENERIC: ${{ steps.changed-files.outputs.generic_all_changed_files }}
+          PYRIGHT: ${{ steps.changed-files.outputs.pyright_all_changed_files }}
+          PYTEST: ${{ steps.changed-files.outputs.pytest_all_changed_files }}
+          RUFF: ${{ steps.changed-files.outputs.ruff_all_changed_files }}
+        run: ''
 
       - name: Set run conditions
         id: run-conditions

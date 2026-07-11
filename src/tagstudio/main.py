@@ -66,7 +66,7 @@ def main():
     args = parser.parse_args()
 
     driver = QtDriver(args)
-    ui_name = "Qt"
+    ui_name = "testt"
 
     # Run the chosen frontend driver.
     try:

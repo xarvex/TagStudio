@@ -173,7 +173,7 @@ jobs:
 
   check-ruff:
     concurrency:
-      group: ${{ github.workflow }}-ruff-${{ github.ref }}
+      group: ${{ github.workflow }}-ruff-${{ runner.os }}-${{ github.ref }}
       cancel-in-progress: true
 
     name: Ruff

@@ -17,6 +17,8 @@ logger = structlog.get_logger(__name__)
 
 
 def main():
+    # print("very important print statement")
+
     # appid = "cyanvoxel.tagstudio.9"
     # ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
 

@@ -22,16 +22,15 @@ on:
     paths: *on_paths
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 defaults:
   run:
     shell: sh
 
 jobs:
   run-conditions:
+    permissions:
+      pull-requests: ${{ case(github.event_name == 'pull_request', 'read', 'none') }}
+
     name: Run Conditions
     runs-on: ubuntu-latest
     outputs:
@@ -40,20 +39,15 @@ jobs:
       ruff: ${{ steps.run-conditions.outputs.ruff }}
     steps:
       - name: Checkout repository
-        if: github.event != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: actions/checkout@v7
         with:
-          fetch-depth: ${{ case(github.event_name == 'pull_request', '1', '0') }}
-          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: '0'
 
       - name: Check changed files
         id: changed-files
         uses: tj-actions/changed-files@v47.0.6
         with:
-          fail_on_initial_diff_error: 'true'
-          fail_on_submodule_diff_error: 'true'
-          skip_initial_fetch: 'true'
-          since_last_remote_commit: 'true'
           files_yaml: |
             generic:
               - .github/workflows/checks_python.yml
@@ -89,6 +83,10 @@ jobs:
           EOF
 
   check-pyright:
+    concurrency: &concurrency
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
     name: Pyright
     needs: run-conditions
     if: needs.run-conditions.outputs.pyright == 'true'
@@ -109,6 +107,7 @@ jobs:
         run: pyright
 
   check-pytest:
+    concurrency: *concurrency
     strategy:
       fail-fast: false
       matrix:
@@ -171,6 +170,8 @@ jobs:
         run: pytest
 
   check-ruff:
+    concurrency: *concurrency
+
     name: Ruff
     needs: run-conditions
     if: needs.run-conditions.outputs.ruff == 'true'

@@ -17,6 +17,8 @@ on:
       - uv.lock
       - '**.pyi?'
   push:
+    branches-ignore:
+      - translations
     paths: *on_paths
   workflow_dispatch:
 
@@ -37,15 +39,11 @@ jobs:
       pytest: ${{ steps.run-conditions.outputs.pytest }}
       ruff: ${{ steps.run-conditions.outputs.ruff }}
     steps:
-      - name: Checkout repository (pull request)
-        if: github.event == 'pull_request'
-        uses: actions/checkout@v7
-
-      - name: Checkout repository (not pull request)
+      - name: Checkout repository
         if: github.event != 'pull_request'
         uses: actions/checkout@v7
         with:
-          fetch-depth: '0'
+          fetch-depth: ${{ case(github.event == 'pull_request', '1', '0') }}
 
       - name: Check changed files
         id: changed-files
@@ -53,6 +51,8 @@ jobs:
         with:
           fail_on_initial_diff_error: 'true'
           fail_on_submodule_diff_error: 'true'
+          skip_initial_fetch: 'true'
+          since_last_remote_commit: 'true'
           files_yaml: |
             generic:
               - .github/workflows/checks_python.yml

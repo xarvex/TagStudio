@@ -37,10 +37,15 @@ jobs:
       pytest: ${{ steps.run-conditions.outputs.pytest }}
       ruff: ${{ steps.run-conditions.outputs.ruff }}
     steps:
-      - name: Checkout repository
+      - name: Checkout repository (pull request)
+        if: github.event == 'pull_request'
+        uses: actions/checkout@v7
+
+      - name: Checkout repository (not pull request)
+        if: github.event != 'pull_request'
         uses: actions/checkout@v7
         with:
-          fetch-depth: ${{ case(github.event == 'pull_request', '1' , '0') }}
+          fetch-depth: '0'
 
       - name: Check changed files
         id: changed-files

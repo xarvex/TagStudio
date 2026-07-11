@@ -7,6 +7,7 @@
 root = true
 
 # Unix-style newlines with a newline ending every file
+# One more for the road
 [*]
 charset = utf-8
 end_of_line = lf

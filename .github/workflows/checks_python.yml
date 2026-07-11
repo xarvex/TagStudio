@@ -72,7 +72,7 @@ jobs:
 
       - name: List changed files
         env:
-          GENERIC_CHANGED_FILES: ${{ steps.changed-files.outputs.generic_changed_files }}
+          GENERIC_CHANGED_FILES: ${{ steps.changed-files.outputs.generic_all_changed_files }}
         run: |
           for file in ${GENERIC_CHANGED_FILES}; do
             echo "$file was changed"

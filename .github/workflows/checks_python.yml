@@ -84,7 +84,7 @@ jobs:
 
   check-pyright:
     concurrency: &concurrency
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
       cancel-in-progress: true
 
     name: Pyright

@@ -17,6 +17,8 @@ logger = structlog.get_logger(__name__)
 
 
 def main():
+    # print("very important print statement")
+
     # appid = "cyanvoxel.tagstudio.9"
     # ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
 
@@ -64,7 +66,7 @@ def main():
     args = parser.parse_args()
 
     driver = QtDriver(args)
-    ui_name = "Qt"
+    ui_name = "testt"
 
     # Run the chosen frontend driver.
     try:
